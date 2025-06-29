@@ -1,5 +1,3 @@
-from unittest import expectedFailure
-
 import requests
 import pytest
 from learn_qa import response
