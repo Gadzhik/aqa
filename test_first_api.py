@@ -1,12 +1,21 @@
-import requests
+from unittest import expectedFailure
 
+import requests
+import pytest
 from learn_qa import response
 
 
 class TestFirstApi:
-    def test_hello_call(self):
+    names = [
+        ("Mike"),
+        ("Olga"),
+        ()
+    ] # добавили словарь с кортежами, содержащие имена
+
+    @pytest.mark.parametrize("name", names) # довесили pytest-вое переопределение (как функциональная дообёртка) функции-тесту, которая добавляет новые возможности (прогонка значений указанных переменных). Переменной 'name' в ней будут подставляться значения из нашего словаря names
+    def test_hello_call(self, name):
         url = "https://playground.learnqa.ru/api/hello"
-        name = "Mike"
+        # name = "Mike" # удаляем (закоментируем) прошлое конкретизированное установление имени. Остальное остаётся прежним
         data = {"name": name}
 
         response = requests.get(url, params=data)
@@ -15,7 +24,11 @@ class TestFirstApi:
         response_dict = response.json()
         assert "answer" in response_dict, "There is no field 'answer' in response"
 
-        expected_response_text = f"Hello, {name}"
+        # ///
+        if len(name) > 0: # добавили условие на проверку того, что имя имеет длинну > 0, т.е, что в имени имеются символы
+            expected_response_text = f"Hello, {name}" # ждем в ответе строку с данным именем
+        else:
+            expected_response_text = "Hello, someone" # а иначе будем ожидать "someone"
         actual_response_text = response_dict["answer"]
         assert actual_response_text == expected_response_text, "Actual text in the response is not correct"
 
@@ -33,4 +46,11 @@ class TestFirstApi:
 • Запускаем тест с помощью команды python -m pytest test_first_api.py -k "test_hello_call"
 '''
 
+'''
+Обратите внимание на строки:
+1. f"Hello, {name}"
+2. "Hello, someone"
+В первом с буквой f. Она позволяет совать в строку динамические данные (переменные). Которые в любой момент времени в этом месте могут быть различными. В данном случае это переменная name
+Во втором, что бы ни произошло, тут статика, а значит всегда будет именно эта строка символ-в-символ
+'''
 
